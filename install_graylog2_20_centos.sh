@@ -1,6 +1,4 @@
 #!/bin/bash -x
-#Provided by @mrlesmithjr
-#EveryThingShouldBeVirtual.com
 
 # Setup Pause function
 function pause(){
@@ -370,5 +368,3 @@ echo "Login with username: admin"
 echo "Login with password: $adminpass"
 echo "You Entered $SERVERNAME During Install"
 echo "Browse to http://$SERVERNAME:9000 If Different"
-echo "EveryThingShouldBeVirtual.com"
-echo "@mrlesmithjr"
