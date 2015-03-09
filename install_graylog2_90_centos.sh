@@ -1,14 +1,13 @@
 #!/bin/bash -x
-#Provided by @mrlesmithjr
-#EveryThingShouldBeVirtual.com
+
 
 # Setup Pause function
 function pause(){
    read -p "$*"
 }
 
-#updated by Boardstretcher
-
+#updated by Steve
+adminpass="password"
 EPEL_REPO="/etc/yum.repos.d/epel.repo"
 
 echo "Creating $EPEL_REPO"
@@ -16,7 +15,7 @@ cat << 'EOF' > ${EPEL_REPO}
 [epel]
 name=Extra Packages for Enterprise Linux 6 - $basearch
 #baseurl=http://download.fedoraproject.org/pub/epel/6/$basearch
-mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=$basearch
+mirrorlist=http://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=$basearch
 failovermethod=priority
 enabled=1
 gpgcheck=0
@@ -51,6 +50,13 @@ SERVERALIAS=$IPADDY
 
 # Installing all pre-reqs
 yum install -y gcc gcc-c++ gd gd-devel glibc glibc-common glibc-devel glibc-headers make automake wget tar vim nc libcurl-devel openssl-devel zlib-devel zlib patch readline readline-devel libffi-devel curl-devel libyaml-devel libtoolbisonlibxml2-devel libxslt-devel libtool bison pwgen nc
+yum install -y nc
+yum install -y mlocate
+yum install -y screen
+yum install -y telnet
+
+
+
 
 #install sun java (unless you like crashes, in that case use openjdk)
 curl -L http://javadl.sun.com/webapps/download/AutoDL?BundleId=80804 -o java.rpm
@@ -65,7 +71,7 @@ wget http://packages.graylog2.org/releases/graylog2-web-interface/graylog2-web-i
 
 # Extract files
 echo "Extracting Graylog2-Server and Graylog2-Web-Interface to /opt"
-  for f in *.*gz
+  for f in *.*gz*
 do
 tar zxf "$f"
 done
@@ -96,7 +102,10 @@ enabled=1
 EOF
 ) | tee /etc/yum.repos.d/10gen.repo
 
-yum install -y mongo-10gen-server && /etc/init.d/mongod start
+sudo sed -i "s/mirrorlist=https/mirrorlist=http/" /etc/yum.repos.d/epel.repo
+
+yum install -y mongo-10gen-server
+/etc/init.d/mongod start
 
 # Waiting for MongoDB to start accepting connections on tcp/27017
 echo "!!!*** Waiting for MongoDB to start accepting connections ***!!!"
@@ -105,13 +114,13 @@ while ! nc -vz localhost 27017; do sleep 1; done
 
 # Install graylog2-server
 echo "Installing graylog2-server"
-echo -n "Enter a password to use for the admin account to login to the Graylog2 webUI: "
-read adminpass
+echo -n "Enter a password to use for the admin account to login to the Graylog2 webUI: - look on top for the admin password - is $adminpass "
+#read adminpass - instead it is set 
 echo "You entered $adminpass (MAKE SURE TO NOT FORGET THIS PASSWORD!)"
-pause 'Press [Enter] key to continue...'
+#pause 'Press [Enter] key to continue...'
+
 cd graylog2-server/
-cp /opt/graylog2-server/graylog2.conf{.example,}
-mv graylog2.conf /etc/
+cp /opt/graylog2-server/graylog2.conf.example /etc/graylog2.conf
 pass_secret=$(pwgen -s 96)
 admin_pass_hash=$(echo -n $adminpass|sha256sum|awk '{print $1}')
 sed -i -e 's|password_secret =|password_secret = '$pass_secret'|' /etc/graylog2.conf
@@ -370,5 +379,4 @@ echo "Login with username: admin"
 echo "Login with password: $adminpass"
 echo "You Entered $SERVERNAME During Install"
 echo "Browse to http://$SERVERNAME:9000 If Different"
-echo "EveryThingShouldBeVirtual.com"
-echo "@mrlesmithjr"
+echo "http://github/stevengonsalvez"

@@ -1,15 +1,20 @@
 #Provided by @mrlesmithjr
 #EveryThingShouldBeVirtual.com
 
+VM_NAME = "cent06-graylog"
+VM_IP= "192.168.56.60"
+
 Vagrant.configure(2) do |config|
-  config.vm.box = "mrlesmithjr/ubuntu-14.04-base"
+  config.vm.box = "CentOS-6.4-x86_64-v20130731"
+  config.vm.box_url = "http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-x86_64-v20130731.box"
   config.vm.provider "virtualbox" do |vb|
-    vb.name = "graylog2-server"
+    vb.name = "cent05-graylog"
     vb.memory = "2048"
     vb.cpus = "2"  
   end
   config.vm.define :server do |srv|
-    srv.vm.hostname = "graylog2-server"
+    srv.vm.hostname = "cent06-graylog"
+	srv.vm.network :private_network, ip: VM_IP
     srv.vm.network :forwarded_port, guest: 514, host: 1514, protocol: 'tcp'
     srv.vm.network :forwarded_port, guest: 514, host: 1514, protocol: 'udp'
     srv.vm.network :forwarded_port, guest: 9000, host: 9000
